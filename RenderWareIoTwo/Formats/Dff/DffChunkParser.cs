@@ -49,6 +49,11 @@ public static class DffChunkParser
     {
         switch (parent)
         {
+            case DffChunkType.Atomic:
+                var atomic = new AtomicStruct();
+                atomic.ReadFrom(stream, header);
+                return atomic;
+
             case DffChunkType.Clump:
                 var clump = new ClumpStruct();
                 clump.ReadFrom(stream, header);
@@ -69,6 +74,15 @@ public static class DffChunkParser
                 geometry.ReadFrom(stream, header);
                 return geometry;
 
+            case DffChunkType.Material:
+                var material = new MaterialStruct();
+                material.ReadFrom(stream, header);
+                return material;
+
+            case DffChunkType.Texture:
+                var texture = new TextureStruct();
+                texture.ReadFrom(stream, header);
+                return texture;
         }
 
         var unknown = new UnknownDffStruct();

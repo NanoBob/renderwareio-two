@@ -17,6 +17,6 @@ public class TextureStruct : DffStruct
     public ushort Unknown
     {
         get => BitConverter.ToUInt16(this.Data, 2);
-        set => this.Data.ReplaceUint32(2, value);
+        set => this.Data.ReplaceUint16(2, value);
     }
 }
