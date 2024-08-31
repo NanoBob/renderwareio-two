@@ -22,6 +22,14 @@ public static class StreamExtensions
         ], 0);
     }
 
+    public static short ReadInt16(this Stream stream)
+    {
+        return BitConverter.ToInt16([
+            ReadSingleByte(stream),
+            ReadSingleByte(stream)
+        ], 0);
+    }
+
     public static void WriteUint16(this Stream stream, ushort value)
     {
         stream.Write(BitConverter.GetBytes(value), 0, 2);

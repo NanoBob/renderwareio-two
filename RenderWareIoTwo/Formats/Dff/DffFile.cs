@@ -4,11 +4,14 @@ namespace RenderWareIoTwo.Formats.Dff;
 
 public class DffFile
 {
-    public Clump Clump { get; set; }
+    public Clump Clump { get; set; } = new();
+
+    public DffFile()
+    {
+    }
 
     public DffFile(Stream stream)
     {
-        this.Clump = new();
         this.Clump.ReadFrom(stream);
     }
 

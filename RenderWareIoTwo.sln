@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34714.143
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RenderWareIoTwo", "RenderWareIoTwo\RenderWareIoTwo.csproj", "{1A2B9068-50FC-4B5C-89C7-2AB61AEFB464}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RenderWareIoTwo", "RenderWareIoTwo\RenderWareIoTwo.csproj", "{1A2B9068-50FC-4B5C-89C7-2AB61AEFB464}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RenderWareIoTwo.Example", "RenderWareIoTwo.Example\RenderWareIoTwo.Example.csproj", "{334164D9-7912-4C43-A6A4-6038A71897B1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RenderWareIoTwo.Example", "RenderWareIoTwo.Example\RenderWareIoTwo.Example.csproj", "{334164D9-7912-4C43-A6A4-6038A71897B1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RenderWareIoTwo.Tests", "RenderWareIoTwo.Tests\RenderWareIoTwo.Tests.csproj", "{A54D9D9F-9B6D-484B-BF68-3DAA45C46280}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{334164D9-7912-4C43-A6A4-6038A71897B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{334164D9-7912-4C43-A6A4-6038A71897B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{334164D9-7912-4C43-A6A4-6038A71897B1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A54D9D9F-9B6D-484B-BF68-3DAA45C46280}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A54D9D9F-9B6D-484B-BF68-3DAA45C46280}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A54D9D9F-9B6D-484B-BF68-3DAA45C46280}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A54D9D9F-9B6D-484B-BF68-3DAA45C46280}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

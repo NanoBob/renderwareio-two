@@ -5,7 +5,7 @@ using System.Diagnostics;
 namespace RenderWareIoTwo.Formats.Dff;
 
 [DebuggerDisplay("{DebuggerDisplay,nq}")]
-public class DffChunk : IStreamReadable, IStreamWriteable
+public class DffChunk : IDffStreamReadable, IStreamWriteable
 {
     public DffHeader Header { get; set; } = new();
     public DffStruct? Struct { get; set; }

@@ -16,7 +16,7 @@ public class DffHeader : IStreamReadable, IStreamWriteable
         stream.WriteUint32(LibraryId);
     }
 
-    public void ReadFrom(Stream stream, DffHeader? header = null)
+    public void ReadFrom(Stream stream)
     {
         this.Type = (DffChunkType)stream.ReadUint32();
         this.Size = stream.ReadUint32();
