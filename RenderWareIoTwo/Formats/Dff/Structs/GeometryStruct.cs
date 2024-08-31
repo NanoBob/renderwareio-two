@@ -49,7 +49,7 @@ public class GeometryStruct : DffStruct
     public uint VertexCount { get; set; }
     public uint MorphTargetCount { get; set; }
     public List<Color> Colors { get; set; } = [];
-    public List<Uv> TextureCoordinates { get; set; } = [];
+    public List<List<Uv>> UvLayers { get; set; } = [];
     public List<Triangle> Triangles { get; set; } = [];
     public List<MorphTarget> MorphTargets { get; set; } = [];
 
@@ -72,10 +72,13 @@ public class GeometryStruct : DffStruct
                 stream.WriteByte(color.A);
             }
 
-        foreach (var uv in this.TextureCoordinates)
+        foreach (var layer in this.UvLayers)
         {
-            stream.WriteFloat(uv.X);
-            stream.WriteFloat(uv.Y);
+            foreach (var uv in layer)
+            {
+                stream.WriteFloat(uv.X);
+                stream.WriteFloat(uv.Y);
+            }
         }
 
         foreach (var triangle in this.Triangles)
@@ -121,34 +124,52 @@ public class GeometryStruct : DffStruct
         this.VertexCount = stream.ReadUint32();
         this.MorphTargetCount = stream.ReadUint32();
 
-        if (this.Flags.HasFlag(GeometryFlags.IsPrelit))
-            for (int i = 0; i < this.VertexCount; i++)
-                this.Colors.Add(new Color(
-                    stream.ReadSingleByte(),
-                    stream.ReadSingleByte(),
-                    stream.ReadSingleByte(),
-                    stream.ReadSingleByte()
+        if (!this.Flags.HasFlag(GeometryFlags.HasNativeGeometry))
+        {
+            if (this.Flags.HasFlag(GeometryFlags.IsPrelit))
+                for (int i = 0; i < this.VertexCount; i++)
+                    this.Colors.Add(new Color(
+                        stream.ReadSingleByte(),
+                        stream.ReadSingleByte(),
+                        stream.ReadSingleByte(),
+                        stream.ReadSingleByte()
+                    ));
+
+            if (this.Flags.HasFlag(GeometryFlags.HasUv) || this.Flags.HasFlag(GeometryFlags.HasOtherMoreDifferentUv))
+            {
+                var textureCount = (((uint)this.Flags) & 0x00FF0000) >> 16;
+                if (textureCount == 0)
+                    textureCount =
+                        this.Flags.HasFlag(GeometryFlags.HasUv) ? 1u :
+                        this.Flags.HasFlag(GeometryFlags.HasOtherMoreDifferentUv) ? 2u
+                        : 0u;
+
+                for (int textureLayer = 0; textureLayer <  textureCount; textureLayer++)
+                {
+                    var layer = new List<Uv>();
+                    this.UvLayers.Add(layer);
+                    for (int i = 0; i < this.VertexCount; i++)
+                        layer.Add(new Uv(
+                            stream.ReadFloat(),
+                            stream.ReadFloat()
+                        ));
+                }
+            }
+
+            for (int i = 0; i < this.TriangleCount; i++)
+                this.Triangles.Add(new Triangle(
+                    stream.ReadUint16(),
+                    stream.ReadUint16(),
+                    (Material)stream.ReadUint16(),
+                    stream.ReadUint16()
                 ));
-
-        for (int i = 0; i < this.VertexCount; i++)
-            this.TextureCoordinates.Add(new Uv(
-                stream.ReadFloat(),
-                stream.ReadFloat()
-            ));
-
-        for (int i = 0; i < this.TriangleCount; i++)
-            this.Triangles.Add(new Triangle(
-                stream.ReadUint16(),
-                stream.ReadUint16(),
-                (Material)stream.ReadUint16(),
-                stream.ReadUint16()
-            ));
+        }
 
         for (int i = 0; i < this.MorphTargetCount; i++)
         {
             var sphere = new Sphere(stream.ReadVector(), stream.ReadFloat());
-            var hasVertices = stream.ReadUint32() == 1;
-            var hasNormals = stream.ReadUint32() == 1;
+            var hasVertices = stream.ReadUint32() != 0;
+            var hasNormals = stream.ReadUint32() != 0;
 
             var vertices = new List<Vector3>();
             if (hasVertices)
@@ -172,8 +193,8 @@ public class GeometryStruct : DffStruct
         this.Header.Size = (uint)(
             4 + 4 + 4 + 4 +
             this.Colors.Count * 4 +
-            this.VertexCount * 8 +
-            this.TriangleCount * 8 + 
+            this.UvLayers.Sum(x => x.Count() * 8) +
+            this.TriangleCount * 8 +
             this.MorphTargets.Sum(x => 
                 12 + 4 +
                 4 + 4 +
