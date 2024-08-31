@@ -16,11 +16,11 @@ public class ColArchive : IStreamReadable
         }
     }
 
-    public void WriteTo(Stream stream, bool updateBoundingBox = true)
+    public void WriteTo(Stream stream, bool updateBoundingBox = true, bool zeroUnusedOffsets = false)
     {
         foreach (var collision in this.Collisions)
         {
-            collision.UpdateHeader(updateBoundingBox);
+            collision.UpdateHeader(updateBoundingBox, zeroUnusedOffsets);
             collision.WriteTo(stream);
         }
     }

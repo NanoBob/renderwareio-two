@@ -58,10 +58,10 @@ public class GeometryStruct : DffStruct
     {
         this.Header.WriteTo(stream);
 
-        stream.WriteUint32((uint)this.Flags);
-        stream.WriteUint32((uint)this.TriangleCount);
-        stream.WriteUint32((uint)this.VertexCount);
-        stream.WriteUint32((uint)this.MorphTargetCount);
+        stream.WriteUint32((uint)this.Flags | (uint)this.UvLayers.Count << 16);
+        stream.WriteUint32(this.TriangleCount);
+        stream.WriteUint32(this.VertexCount);
+        stream.WriteUint32(this.MorphTargetCount);
 
         if (this.Flags.HasFlag(GeometryFlags.IsPrelit))
             foreach (var color in this.Colors)
@@ -119,7 +119,8 @@ public class GeometryStruct : DffStruct
 
         this.ReadPosition = start;
 
-        this.Flags = (GeometryFlags)stream.ReadUint32();
+        var flagData = stream.ReadUint32();
+        this.Flags = (GeometryFlags)(flagData & 0xFF00FFFF);
         this.TriangleCount = stream.ReadUint32();
         this.VertexCount = stream.ReadUint32();
         this.MorphTargetCount = stream.ReadUint32();
@@ -137,14 +138,14 @@ public class GeometryStruct : DffStruct
 
             if (this.Flags.HasFlag(GeometryFlags.HasUv) || this.Flags.HasFlag(GeometryFlags.HasOtherMoreDifferentUv))
             {
-                var textureCount = (((uint)this.Flags) & 0x00FF0000) >> 16;
+                var textureCount = ((flagData) & 0x00FF0000) >> 16;
                 if (textureCount == 0)
                     textureCount =
                         this.Flags.HasFlag(GeometryFlags.HasUv) ? 1u :
                         this.Flags.HasFlag(GeometryFlags.HasOtherMoreDifferentUv) ? 2u
                         : 0u;
 
-                for (int textureLayer = 0; textureLayer <  textureCount; textureLayer++)
+                for (int textureLayer = 0; textureLayer < textureCount; textureLayer++)
                 {
                     var layer = new List<Uv>();
                     this.UvLayers.Add(layer);
@@ -185,7 +186,7 @@ public class GeometryStruct : DffStruct
         }
 
         if (stream.Position != start + size)
-            throw new Exception("Haven't read full geometry struct");
+            throw new Exception($"Haven't read full geometry struct, {start + size - stream.Position} bytes left");
     }
 
     public override void UpdateHeaderSize()

@@ -77,14 +77,17 @@ public class ColBody
         var boxCount = stream.ReadUint32();
         for (int i = 0; i < boxCount; i++)
         {
+            var min = stream.ReadVector();
+            var max = stream.ReadVector();
             var surface = new ColSurface();
+            surface.Read(stream);
+
             this.Boxes.Add(new Box()
             {
-                Min = stream.ReadVector(),
-                Max = stream.ReadVector(),
+                Min = min,
+                Max = max,
                 Surface = surface
             });
-            surface.Read(stream);
         }
 
         var vertexCount = stream.ReadUint32();
@@ -98,15 +101,19 @@ public class ColBody
         var faceCount = stream.ReadUint32();
         for (int i = 0; i < faceCount; i++)
         {
+            var a = stream.ReadUint32();
+            var b = stream.ReadUint32();
+            var c = stream.ReadUint32();
             var surface = new ColSurface();
+            surface.Read(stream);
+
             this.Faces.Add(new Face()
             {
-                A = stream.ReadUint32(),
-                B = stream.ReadUint32(),
-                C = stream.ReadUint32(),
+                A = a,
+                B = b,
+                C = c,
                 Surface = surface
             });
-            surface.Read(stream);
         }
     }
 
@@ -123,14 +130,17 @@ public class ColBody
         JumpTo(stream, header, header.BoxOffset);
         for (int i = 0; i < header.BoxCount; i++)
         {
+            var min = stream.ReadVector();
+            var max = stream.ReadVector();
             var surface = new ColSurface();
+            surface.Read(stream);
+
             this.Boxes.Add(new Box()
             {
-                Min = stream.ReadVector(),
-                Max = stream.ReadVector(),
+                Min = min,
+                Max = max,
                 Surface = surface
             });
-            surface.Read(stream);
         }
 
         JumpTo(stream, header, header.FaceOffset);
@@ -214,7 +224,7 @@ public class ColBody
         {
             if (header.ColVersion >= 2)
                 WriteVersion2(stream, header);
-            else
+            if (header.ColVersion >= 3)
                 WriteVersion3(stream, header);
         }
     }
@@ -283,25 +293,28 @@ public class ColBody
             writeCopy.Write(stream);
         }
 
-        if ((this.Vertices.Count * 6) % 4 != 0 && stream.Position != stream.Length)
+        if ((this.Vertices.Count * 6) % 4 != 0)
         {
             stream.WriteChars(['\0', '\0']);
         }
 
-        stream.WriteUint32((uint)this.FaceGroups.Count);
-        foreach (var faceGroup in this.FaceGroups)
+        if (header.Flags.HasFlag(ColllisionFlags.HasFaceGroups))
         {
-            stream.WriteVector(faceGroup.Min);
-            stream.WriteVector(faceGroup.Max);
-            stream.WriteUint16(faceGroup.StartFace);
-            stream.WriteUint16(faceGroup.EndFace);
+            stream.WriteUint32((uint)this.FaceGroups.Count);
+            foreach (var faceGroup in this.FaceGroups)
+            {
+                stream.WriteVector(faceGroup.Min);
+                stream.WriteVector(faceGroup.Max);
+                stream.WriteUint16(faceGroup.StartFace);
+                stream.WriteUint16(faceGroup.EndFace);
+            }
         }
 
         foreach (var face in this.Faces)
         {
-            stream.WriteUint32(face.A);
-            stream.WriteUint32(face.B);
-            stream.WriteUint32(face.C);
+            stream.WriteUint16((ushort)face.A);
+            stream.WriteUint16((ushort)face.B);
+            stream.WriteUint16((ushort)face.C);
             stream.WriteByte((byte)face.Material);
             stream.WriteByte(face.Light);
         }
@@ -316,7 +329,7 @@ public class ColBody
             writeCopy.Write(stream);
         }
 
-        if ((this.ShadowMeshVertices.Count * 6) % 4 != 0 && stream.Position != stream.Length)
+        if ((this.ShadowMeshVertices.Count * 6) % 4 != 0)
         {
             stream.WriteChars(['\0', '\0']);
         }
@@ -348,6 +361,7 @@ public class ColBody
                     this.Spheres.Count * 20 +
                     this.Boxes.Count * 28 +
                     this.Vertices.Count * 6 +
+                    ((((this.Vertices.Count * 6) % 4) != 0) ? 2 : 0) +
                     this.FaceGroups.Count * 28 +
                     (this.FaceGroups.Count > 0 ? 4 : 0) +
                     this.Faces.Count * 8;
@@ -356,6 +370,7 @@ public class ColBody
                 return
                     GetSize(2) +
                     this.ShadowMeshVertices.Count * 6 +
+                    ((((this.ShadowMeshVertices.Count * 6) % 4) != 0) ? 2 : 0) +
                     this.ShadowMeshFaces.Count * 8;
 
             case 4:

@@ -1,4 +1,5 @@
 ﻿using RenderWareIoTwo.Formats.Common;
+using System.Diagnostics;
 using System.Numerics;
 
 namespace RenderWareIoTwo.Formats.Col;
@@ -20,7 +21,7 @@ public class ColCombo : IStreamReadable, IStreamWriteable
         this.Body.WriteTo(stream, this.Header);
     }
 
-    public void UpdateHeader(bool includeBoundingBox = true)
+    public void UpdateHeader(bool includeBoundingBox = true, bool zeroUnusedOffsets = false)
     {
         this.Header.Flags =
             ColllisionFlags.IsNotEmpty |
@@ -47,6 +48,8 @@ public class ColCombo : IStreamReadable, IStreamWriteable
 
         if (this.Header.ColVersion >= 2)
         {
+            var padding = ((this.Body.Vertices.Count() % 4 != 0) ? 2u : 0u);
+
             this.Header.SphereCount = (ushort)this.Body.Spheres.Count;
             this.Header.BoxCount = (ushort)this.Body.Boxes.Count;
             this.Header.FaceCount = (ushort)this.Body.Faces.Count;
@@ -56,7 +59,7 @@ public class ColCombo : IStreamReadable, IStreamWriteable
             this.Header.BoxOffset = this.Header.SphereOffset + this.Header.SphereCount * 20u;
             this.Header.LineOffset = this.Header.BoxOffset + this.Header.BoxCount * 28u;
             this.Header.VertexOffset = this.Header.LineOffset + this.Header.LineCount * 0u;
-            this.Header.FaceOffset = this.Header.VertexOffset + (uint)this.Body.Vertices.Count * 6u;
+            this.Header.FaceOffset = this.Header.VertexOffset + (uint)this.Body.Vertices.Count * 6u + padding;
             this.Header.TrianglePlaneOffset = this.Header.FaceOffset + this.Header.FaceCount * 8u;
 
             this.Header.Size += 36u;
@@ -64,11 +67,11 @@ public class ColCombo : IStreamReadable, IStreamWriteable
 
         if (this.Header.ColVersion >= 3)
         {
+            var padding = ((this.Body.ShadowMeshVertices.Count() % 4 != 0) ? 2u : 0u);
+
             this.Header.ShadowMeshFaceCount = (uint)this.Body.ShadowMeshFaces.Count;
             this.Header.ShadowMeshVertexOffset = this.Header.TrianglePlaneOffset + 0u;
-            this.Header.ShadowMeshFaceOffset = this.Header.ShadowMeshVertexOffset + (uint)this.Body.ShadowMeshVertices.Count * 6u;
-
-            this.Header.Size = (uint)(this.Body.GetSize(this.Header.ColVersion) + 64 + 48u);
+            this.Header.ShadowMeshFaceOffset = this.Header.ShadowMeshVertexOffset + (uint)this.Body.ShadowMeshVertices.Count * 6u + padding;
 
             this.Header.Size += 12u;
         }
@@ -76,6 +79,26 @@ public class ColCombo : IStreamReadable, IStreamWriteable
         if (this.Header.ColVersion >= 4)
         {
             this.Header.Size += 4u;
+        }
+
+        if (zeroUnusedOffsets)
+        {
+            if (!this.Body.Spheres.Any())
+                this.Header.SphereOffset = 0;
+            if (!this.Body.Boxes.Any())
+                this.Header.BoxOffset = 0;
+            if (!this.Body.Faces.Any())
+                this.Header.FaceOffset = 0;
+            if (!this.Body.Vertices.Any())
+                this.Header.VertexOffset = 0;
+
+            this.Header.LineOffset = 0;
+            this.Header.TrianglePlaneOffset = 0;
+
+            if (!this.Body.ShadowMeshVertices.Any())
+                this.Header.ShadowMeshVertexOffset = 0;
+            if (!this.Body.ShadowMeshFaces.Any())
+                this.Header.ShadowMeshFaceOffset = 0;
         }
     }
 }

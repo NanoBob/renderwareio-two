@@ -35,6 +35,11 @@ public static class StreamExtensions
         stream.Write(BitConverter.GetBytes(value), 0, 2);
     }
 
+    public static void WriteInt16(this Stream stream, short value)
+    {
+        stream.Write(BitConverter.GetBytes(value), 0, 2);
+    }
+
     public static uint ReadUint32(this Stream stream)
     {
         return BitConverter.ToUInt32([

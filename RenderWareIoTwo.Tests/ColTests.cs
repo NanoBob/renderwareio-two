@@ -7,9 +7,15 @@ namespace RenderWareIoTwo.Tests;
 public class ColTests
 {
     [Theory]
-    [InlineData(@"Files\Col\col1.col", $@"Files\Col\{nameof(ReadAndWrite_ShouldEqual)}-output-col1.col")]
-    //[InlineData(@"Files\Col\col3.col", $@"Files\Col\{nameof(ReadAndWrite_ShouldEqual)}-output-col3.col")]
-    public void ReadAndWrite_ShouldEqual(string inputPath, string outputPath)
+    [InlineData(@"Files\Col\cube-1.col", $@"Files\Col\{nameof(ReadAndWrite_ShouldEqual)}-cube-1.col")]
+    [InlineData(@"Files\Col\cube-3.col", $@"Files\Col\{nameof(ReadAndWrite_ShouldEqual)}-cube-3.col")]
+    [InlineData(@"Files\Col\donut-1.col", $@"Files\Col\{nameof(ReadAndWrite_ShouldEqual)}-donut-1.col")]
+    [InlineData(@"Files\Col\donut-3.col", $@"Files\Col\{nameof(ReadAndWrite_ShouldEqual)}-donut-3.col")]
+    [InlineData(@"Files\Col\monkey-1.col", $@"Files\Col\{nameof(ReadAndWrite_ShouldEqual)}-monkey-1.col")]
+    [InlineData(@"Files\Col\monkey-3.col", $@"Files\Col\{nameof(ReadAndWrite_ShouldEqual)}-monkey-3.col")]
+    [InlineData(@"Files\Col\col1-multiple-3.col", $@"Files\Col\{nameof(ReadAndWrite_ShouldEqual)}-col1-multiple-3.col")]
+    [InlineData(@"Files\Col\col3-multiple-3.col", $@"Files\Col\{nameof(ReadAndWrite_ShouldEqual)}-col3-multiple-3.col", true)]
+    public void ReadAndWrite_ShouldEqual(string inputPath, string outputPath, bool zeroUnusedOffsets = false)
     {
         if (File.Exists(outputPath))
             File.Delete(outputPath);
@@ -21,7 +27,7 @@ public class ColTests
         Console.WriteLine(col);
 
         using var output = File.OpenWrite(outputPath);
-        col.WriteTo(output, false);
+        col.WriteTo(output, false, zeroUnusedOffsets);
         output.Close();
 
         var inputBuffer = File.ReadAllBytes(inputPath);
@@ -31,7 +37,10 @@ public class ColTests
     }
 
     [Theory]
-    [InlineData(@"Files\Col\col1-multiple.col", 5)]
+    [InlineData(@"Files\Col\mixed-multiple-2.col", 2)]
+    [InlineData(@"Files\Col\mixed-multiple-6.col", 6)]
+    [InlineData(@"Files\Col\col1-multiple-3.col", 3)]
+    [InlineData(@"Files\Col\col3-multiple-3.col", 3)]
     public void ReadColWithMultipleCollidersShouldParseAll(string inputPath, int expectedCount)
     {
         using var input = File.OpenRead(inputPath);
@@ -42,8 +51,12 @@ public class ColTests
     }
 
     [Theory]
-    [InlineData(@"Files\Col\col1.col", 24, 16, 0, 23, 0)]
-    [InlineData(@"Files\Col\col3.col", 8, 12, 0, 0, 0)]
+    [InlineData(@"Files\Col\cube-1.col", 24, 12, 0, 0, 0)]
+    [InlineData(@"Files\Col\cube-3.col", 24, 12, 0, 0, 0)]
+    [InlineData(@"Files\Col\donut-1.col", 36864, 12288, 0, 0, 0)]
+    [InlineData(@"Files\Col\donut-3.col", 36864, 12288, 0, 0, 0)]
+    [InlineData(@"Files\Col\monkey-1.col", 2875, 968, 0, 0, 0)]
+    [InlineData(@"Files\Col\monkey-3.col", 2875, 968, 0, 0, 0)]
     [InlineData(@"Files\Col\col3-chunk.col", 4225, 8192, 0, 0, 0)]
     public void ReadColWithSingleCollisionShouldContainExpectedCounts(
         string inputPath, 

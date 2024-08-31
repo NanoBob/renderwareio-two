@@ -74,9 +74,9 @@ public struct ColVertex
             )
                 throw new CollisionVertexOutOfRangeException($"Collision vertex positions must be in range of [-256 to 256] when using versions other than COL1");
 
-            stream.WriteFloat(xShort);
-            stream.WriteFloat(yShort);
-            stream.WriteFloat(zShort);
+            stream.WriteInt16(xShort);
+            stream.WriteInt16(yShort);
+            stream.WriteInt16(zShort);
         }
     }
 }

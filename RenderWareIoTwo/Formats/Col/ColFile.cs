@@ -14,9 +14,9 @@ public class ColFile
         this.Archive.ReadFrom(stream);
     }
 
-    public void WriteTo(Stream stream, bool updateBoundingBox = true)
+    public void WriteTo(Stream stream, bool updateBoundingBox = true, bool zeroUnusedOffsets = false)
     {
-        this.Archive.WriteTo(stream, updateBoundingBox);
+        this.Archive.WriteTo(stream, updateBoundingBox, zeroUnusedOffsets);
     }
 
     public override string? ToString()

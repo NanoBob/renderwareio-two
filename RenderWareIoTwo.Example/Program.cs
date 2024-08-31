@@ -1,28 +1,39 @@
-﻿using RenderWareIoTwo.Formats.Dff;
+﻿
+//var inputPath = "C:\\code\\csharp\\RenderWareIoTwo\\RenderWareIoTwo.Tests\\Files\\Dff\\large-input.dff";
+//var outputPath = "output.col";
 
-var inputPath = "input.dff";
-var outputPath = "output.dff";
+//Examples.GenerateLargeCol(inputPath, outputPath);
 
-using var input = File.OpenRead(inputPath);
-var dff = new DffFile(input);
-input.Close();
+//var inputs = @"C:\Program Files (x86)\MTA San Andreas 1.6\server\mods\deathmatch\resources\chunks\chunks";
+//foreach (var dffPath in Directory.GetFiles(inputs, "*.dff"))
+//{
+//    var colPath = Path.Join(Path.GetDirectoryName(dffPath), $"{Path.GetFileNameWithoutExtension(dffPath)}.col");
+//    if (File.Exists(colPath))
+//        File.Delete(colPath);
 
-Console.WriteLine(dff);
+//    Examples.GenerateCol1(dffPath, colPath);
 
-using var output = File.OpenWrite(outputPath);
-dff.WriteTo(output);
-output.Close();
+//    Console.WriteLine(colPath);
+//}
 
-
-var inputBuffer = File.ReadAllBytes(inputPath);
-var outputBuffer = File.ReadAllBytes(outputPath);
-
-for (int i = 0; i < inputBuffer.Length; i++)
+var files = new Dictionary<string, string>()
 {
-    if (inputBuffer[i] != outputBuffer[i])
-    {
-        throw new Exception($"Files do not match at {i}");
-    }
-}
+    ["C:\\code\\csharp\\RenderWareIoTwo\\RenderWareIoTwo.Tests\\Files\\Dff\\cube.dff"] = "C:\\code\\csharp\\RenderWareIoTwo\\RenderWareIoTwo.Tests\\Files\\Col",
+    ["C:\\code\\csharp\\RenderWareIoTwo\\RenderWareIoTwo.Tests\\Files\\Dff\\monkey.dff"] = "C:\\code\\csharp\\RenderWareIoTwo\\RenderWareIoTwo.Tests\\Files\\Col",
+    ["C:\\code\\csharp\\RenderWareIoTwo\\RenderWareIoTwo.Tests\\Files\\Dff\\donut.dff"] = "C:\\code\\csharp\\RenderWareIoTwo\\RenderWareIoTwo.Tests\\Files\\Col",
+};
 
-Console.WriteLine("Files match.");
+foreach (var (source, targetDirectory) in files)
+{
+    var colPath1 = Path.Join(targetDirectory, $"{Path.GetFileNameWithoutExtension(source)}-1.col");
+    var colPath3 = Path.Join(targetDirectory, $"{Path.GetFileNameWithoutExtension(source)}-3.col");
+    if (File.Exists(colPath1))
+        File.Delete(colPath1);
+    if (File.Exists(colPath3))
+        File.Delete(colPath3);
+
+    Examples.GenerateCol1(source, colPath1);
+    Examples.GenerateCol3(source, colPath3);
+
+    Console.WriteLine(source);
+}

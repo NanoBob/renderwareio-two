@@ -4,13 +4,13 @@ using RenderWareIoTwo.Formats.Dff;
 
 public static partial class Examples
 {
-    public static void GenerateLargeCol(string inputDffPath, string outputColPath)
+    public static void GenerateCol3(string inputDffPath, string outputColPath)
     {
         using var input = File.OpenRead(inputDffPath);
         var dff = new DffFile(input);
         input.Close();
 
-        //Console.WriteLine(dff);
+        Console.WriteLine(dff);
 
         var geometryChunk = dff.Clump
             .GetChild<DffChunk>(RenderWareIoTwo.Formats.Dff.Enums.DffChunkType.Geometry, true);
@@ -35,8 +35,8 @@ public static partial class Examples
                     {
                         Header = new()
                         {
-                            ColVersion = 1,
-                            Name = "LARGE".PadRight(22).ToCharArray()
+                            ColVersion = 3,
+                            Name = "THREE".PadRight(22).ToCharArray()
                         },
                         Body = new()
                         {
@@ -74,6 +74,6 @@ public static partial class Examples
         var col2 = new ColFile(reopenend);
         reopenend.Close();
 
-        //Console.WriteLine("Re-read file successfully");
+        Console.WriteLine("Re-read file successfully");
     }
 }

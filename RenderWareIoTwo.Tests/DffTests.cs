@@ -1,6 +1,5 @@
 using FluentAssertions;
 using RenderWareIoTwo.Formats.Dff;
-using System.Diagnostics;
 using Xunit.Abstractions;
 
 namespace RenderWareIoTwo.Tests;
@@ -8,8 +7,10 @@ namespace RenderWareIoTwo.Tests;
 public class DffTests(ITestOutputHelper testOutput)
 {
     [Theory]
-    [InlineData(@"Files\Dff\basic-input.dff", $@"Files\Dff\{nameof(DffReadAndWrite_ShouldEqual)}-basic-output.dff")]
-    [InlineData(@"Files\Dff\vehicle-input.dff", $@"Files\Dff\{nameof(DffReadAndWrite_ShouldEqual)}-vehicle-output.dff")]
+    [InlineData(@"Files\Dff\cube.dff", $@"Files\Dff\{nameof(DffReadAndWrite_ShouldEqual)}-cube.dff")]
+    [InlineData(@"Files\Dff\monkey.dff", $@"Files\Dff\{nameof(DffReadAndWrite_ShouldEqual)}-monkey.dff")]
+    [InlineData(@"Files\Dff\donut.dff", $@"Files\Dff\{nameof(DffReadAndWrite_ShouldEqual)}-donut.dff")]
+    //[InlineData(@"Files\Dff\vehicle-input.dff", $@"Files\Dff\{nameof(DffReadAndWrite_ShouldEqual)}-vehicle.dff")]
     public void DffReadAndWrite_ShouldEqual(string inputPath, string outputPath)
     {
         if (File.Exists(outputPath))
