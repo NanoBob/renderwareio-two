@@ -18,7 +18,7 @@ public class ColHeader : IStreamReadable, IStreamWriteable
     // version 1
     public char[] FourCC { get; set; } = ['C', 'O', 'L', '3'];
     public uint Size { get; set; }
-    public char[] Name { get; set; } = [];
+    public char[] Name { get; set; } = new char[22];
     public short ModelId { get; set; }
 
     public float BoundingRadius { get; set; }
@@ -141,6 +141,9 @@ public class ColHeader : IStreamReadable, IStreamWriteable
 
     public void WriteTo(Stream stream)
     {
+        if (this.Name.Length != 22)
+            throw new CollisionNameSizeMismatchException($"A collision name must be exactly 22 characters long, got {this.Name.Length} (\"{new string(this.Name)}\")");
+
         stream.WriteChars(this.FourCC);
         stream.WriteUint32(this.Size);
         stream.WriteChars(this.Name);

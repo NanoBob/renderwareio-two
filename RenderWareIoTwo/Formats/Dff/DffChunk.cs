@@ -8,7 +8,7 @@ namespace RenderWareIoTwo.Formats.Dff;
 public class DffChunk : IDffStreamReadable, IStreamWriteable
 {
     public DffHeader Header { get; set; } = new();
-    public DffStruct? Struct { get; set; }
+    public DffStruct? Struct => this.Children.SingleOrDefault(x => x.Header.Type == DffChunkType.Struct) as DffStruct;
     public List<DffChunk> Children { get; set; } = [];
 
     public long ReadPosition { get; protected set; }
@@ -16,7 +16,6 @@ public class DffChunk : IDffStreamReadable, IStreamWriteable
     public virtual void WriteTo(Stream stream)
     {
         this.Header.WriteTo(stream);
-        this.Struct?.WriteTo(stream);
 
         foreach (var child in this.Children)
             child.WriteTo(stream);
@@ -52,7 +51,7 @@ public class DffChunk : IDffStreamReadable, IStreamWriteable
         }
     }
 
-    public T GetChild<T>(bool recursive = false) where T : DffChunk
+    public T? GetChild<T>(bool recursive = false) where T : DffChunk
     {
         if (recursive)
         {
@@ -68,10 +67,10 @@ public class DffChunk : IDffStreamReadable, IStreamWriteable
             }
         }
 
-        return (T)this.Children.Single(x => x is T);
+        return (T?)this.Children.SingleOrDefault(x => x is T);
     }
 
-    public T GetChild<T>(DffChunkType type, bool recursive = false) where T : DffChunk
+    public T? GetChild<T>(DffChunkType type, bool recursive = false) where T : DffChunk
     {
         if (recursive)
         {
@@ -81,13 +80,13 @@ public class DffChunk : IDffStreamReadable, IStreamWriteable
 
             foreach (var child in this.Children)
             {
-                var match = child.GetChild<T>(recursive);
+                var match = child.GetChild<T>(type, recursive);
                 if (match != null)
                     return match;
             }
         }
 
-        return (T)this.Children.Single(x => x.Header.Type == type);
+        return (T?)this.Children.SingleOrDefault(x => x.Header.Type == type);
     }
 
     public IEnumerable<T> GetChildren<T>(bool recursive = false) where T : DffChunk
@@ -119,7 +118,7 @@ public class DffChunk : IDffStreamReadable, IStreamWriteable
 
             foreach (var child in this.Children)
             {
-                var match = child.GetChildren<T>(recursive);
+                var match = child.GetChildren<T>(type, recursive);
                 if (match != null)
                     return match;
             }
