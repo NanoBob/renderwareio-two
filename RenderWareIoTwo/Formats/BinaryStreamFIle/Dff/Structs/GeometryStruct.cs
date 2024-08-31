@@ -1,7 +1,8 @@
 ﻿using System.Numerics;
+using RenderWareIoTwo.Formats.BinaryStreamFile;
 using RenderWareIoTwo.Formats.Common;
 
-namespace RenderWareIoTwo.Formats.Dff;
+namespace RenderWareIoTwo.Formats.BinaryStreamFIle.Dff.Structs;
 
 [Flags]
 public enum GeometryFlags : uint
@@ -42,7 +43,7 @@ public record struct Sphere(Vector3 Position, float Radius)
 public record struct MorphTarget(Sphere Sphere, bool HasPosition, bool HasNormals, List<Vector3> Vertices, List<Vector3> Normals);
 
 
-public class GeometryStruct : DffStruct
+public class GeometryStruct : BinaryStreamStruct
 {
     public GeometryFlags Flags { get; set; }
     public uint TriangleCount { get; set; }
@@ -56,15 +57,15 @@ public class GeometryStruct : DffStruct
 
     public override void WriteTo(Stream stream)
     {
-        this.Header.WriteTo(stream);
+        Header.WriteTo(stream);
 
-        stream.WriteUint32((uint)this.Flags | (uint)this.UvLayers.Count << 16);
-        stream.WriteUint32(this.TriangleCount);
-        stream.WriteUint32(this.VertexCount);
-        stream.WriteUint32(this.MorphTargetCount);
+        stream.WriteUint32((uint)Flags | (uint)UvLayers.Count << 16);
+        stream.WriteUint32(TriangleCount);
+        stream.WriteUint32(VertexCount);
+        stream.WriteUint32(MorphTargetCount);
 
-        if (this.Flags.HasFlag(GeometryFlags.IsPrelit))
-            foreach (var color in this.Colors)
+        if (Flags.HasFlag(GeometryFlags.IsPrelit))
+            foreach (var color in Colors)
             {
                 stream.WriteByte(color.R);
                 stream.WriteByte(color.G);
@@ -72,7 +73,7 @@ public class GeometryStruct : DffStruct
                 stream.WriteByte(color.A);
             }
 
-        foreach (var layer in this.UvLayers)
+        foreach (var layer in UvLayers)
         {
             foreach (var uv in layer)
             {
@@ -81,7 +82,7 @@ public class GeometryStruct : DffStruct
             }
         }
 
-        foreach (var triangle in this.Triangles)
+        foreach (var triangle in Triangles)
         {
             stream.WriteUint16(triangle.VertexIndex2);
             stream.WriteUint16(triangle.VertexIndex1);
@@ -89,7 +90,7 @@ public class GeometryStruct : DffStruct
             stream.WriteUint16(triangle.VertexIndex3);
         }
 
-        foreach (var morphTarget in this.MorphTargets)
+        foreach (var morphTarget in MorphTargets)
         {
             stream.WriteVector(morphTarget.Sphere.Position);
             stream.WriteFloat(morphTarget.Sphere.Radius);
@@ -107,49 +108,49 @@ public class GeometryStruct : DffStruct
         }
     }
 
-    public override void ReadFrom(Stream stream, DffHeader? header = null)
+    public override void ReadFrom(Stream stream, BinaryStreamHeader? header = null)
     {
         if (header == null)
-            this.Header.ReadFrom(stream);
+            Header.ReadFrom(stream);
         else
-            this.Header = header;
+            Header = header;
 
         var start = stream.Position;
-        var size = this.Header.Size;
+        var size = Header.Size;
 
-        this.ReadPosition = start;
+        ReadPosition = start;
 
         var flagData = stream.ReadUint32();
-        this.Flags = (GeometryFlags)(flagData & 0xFF00FFFF);
-        this.TriangleCount = stream.ReadUint32();
-        this.VertexCount = stream.ReadUint32();
-        this.MorphTargetCount = stream.ReadUint32();
+        Flags = (GeometryFlags)(flagData & 0xFF00FFFF);
+        TriangleCount = stream.ReadUint32();
+        VertexCount = stream.ReadUint32();
+        MorphTargetCount = stream.ReadUint32();
 
-        if (!this.Flags.HasFlag(GeometryFlags.HasNativeGeometry))
+        if (!Flags.HasFlag(GeometryFlags.HasNativeGeometry))
         {
-            if (this.Flags.HasFlag(GeometryFlags.IsPrelit))
-                for (int i = 0; i < this.VertexCount; i++)
-                    this.Colors.Add(new Color(
+            if (Flags.HasFlag(GeometryFlags.IsPrelit))
+                for (int i = 0; i < VertexCount; i++)
+                    Colors.Add(new Color(
                         stream.ReadSingleByte(),
                         stream.ReadSingleByte(),
                         stream.ReadSingleByte(),
                         stream.ReadSingleByte()
                     ));
 
-            if (this.Flags.HasFlag(GeometryFlags.HasUv) || this.Flags.HasFlag(GeometryFlags.HasOtherMoreDifferentUv))
+            if (Flags.HasFlag(GeometryFlags.HasUv) || Flags.HasFlag(GeometryFlags.HasOtherMoreDifferentUv))
             {
-                var textureCount = ((flagData) & 0x00FF0000) >> 16;
+                var textureCount = (flagData & 0x00FF0000) >> 16;
                 if (textureCount == 0)
                     textureCount =
-                        this.Flags.HasFlag(GeometryFlags.HasUv) ? 1u :
-                        this.Flags.HasFlag(GeometryFlags.HasOtherMoreDifferentUv) ? 2u
+                        Flags.HasFlag(GeometryFlags.HasUv) ? 1u :
+                        Flags.HasFlag(GeometryFlags.HasOtherMoreDifferentUv) ? 2u
                         : 0u;
 
                 for (int textureLayer = 0; textureLayer < textureCount; textureLayer++)
                 {
                     var layer = new List<Uv>();
-                    this.UvLayers.Add(layer);
-                    for (int i = 0; i < this.VertexCount; i++)
+                    UvLayers.Add(layer);
+                    for (int i = 0; i < VertexCount; i++)
                         layer.Add(new Uv(
                             stream.ReadFloat(),
                             stream.ReadFloat()
@@ -157,8 +158,8 @@ public class GeometryStruct : DffStruct
                 }
             }
 
-            for (int i = 0; i < this.TriangleCount; i++)
-                this.Triangles.Add(new Triangle(
+            for (int i = 0; i < TriangleCount; i++)
+                Triangles.Add(new Triangle(
                     stream.ReadUint16(),
                     stream.ReadUint16(),
                     (Material)stream.ReadUint16(),
@@ -166,7 +167,7 @@ public class GeometryStruct : DffStruct
                 ));
         }
 
-        for (int i = 0; i < this.MorphTargetCount; i++)
+        for (int i = 0; i < MorphTargetCount; i++)
         {
             var sphere = new Sphere(stream.ReadVector(), stream.ReadFloat());
             var hasVertices = stream.ReadUint32() != 0;
@@ -174,15 +175,15 @@ public class GeometryStruct : DffStruct
 
             var vertices = new List<Vector3>();
             if (hasVertices)
-                for (int j = 0; j < this.VertexCount; j++)
+                for (int j = 0; j < VertexCount; j++)
                     vertices.Add(stream.ReadVector());
 
             var normals = new List<Vector3>();
             if (hasNormals)
-                for (int j = 0; j < this.VertexCount; j++)
+                for (int j = 0; j < VertexCount; j++)
                     normals.Add(stream.ReadVector());
 
-            this.MorphTargets.Add(new MorphTarget(sphere, hasVertices, hasNormals, vertices, normals));
+            MorphTargets.Add(new MorphTarget(sphere, hasVertices, hasNormals, vertices, normals));
         }
 
         if (stream.Position != start + size)
@@ -191,12 +192,12 @@ public class GeometryStruct : DffStruct
 
     public override void UpdateHeaderSize()
     {
-        this.Header.Size = (uint)(
+        Header.Size = (uint)(
             4 + 4 + 4 + 4 +
-            this.Colors.Count * 4 +
-            this.UvLayers.Sum(x => x.Count() * 8) +
-            this.TriangleCount * 8 +
-            this.MorphTargets.Sum(x => 
+            Colors.Count * 4 +
+            UvLayers.Sum(x => x.Count() * 8) +
+            TriangleCount * 8 +
+            MorphTargets.Sum(x =>
                 12 + 4 +
                 4 + 4 +
                 x.Vertices.Count * 12 +

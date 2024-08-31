@@ -1,6 +1,8 @@
 ﻿using RenderWareIoTwo.Formats.Col;
 using RenderWareIoTwo.Formats.Col.BodyStructs;
-using RenderWareIoTwo.Formats.Dff;
+using RenderWareIoTwo.Formats.BinaryStreamFile;
+using RenderWareIoTwo.Formats.BinaryStreamFIle.Dff.Structs;
+using RenderWareIoTwo.Formats.BinaryStreamFIle.Dff;
 
 public static partial class Examples
 {
@@ -13,7 +15,7 @@ public static partial class Examples
         Console.WriteLine(dff);
 
         var geometryChunk = dff.Clump
-            .GetChild<DffChunk>(RenderWareIoTwo.Formats.Dff.Enums.DffChunkType.Geometry, true);
+            .GetChild<BinaryStreamChunk>(RenderWareIoTwo.Formats.BinaryStreamFile.Enums.BinaryStreamChunkType.Geometry, true);
 
         var geometry = geometryChunk?.Struct as GeometryStruct;
         if (geometry == null)

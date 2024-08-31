@@ -1,6 +1,6 @@
-﻿namespace RenderWareIoTwo.Formats.Dff;
+﻿namespace RenderWareIoTwo.Formats.BinaryStreamFile;
 
-public abstract class DffStruct : DffChunk
+public abstract class BinaryStreamStruct : BinaryStreamChunk
 {
     public byte[] Data { get; set; } = [];
 
@@ -10,7 +10,7 @@ public abstract class DffStruct : DffChunk
         stream.Write(Data);
     }
 
-    public override void ReadFrom(Stream stream, DffHeader? header = null)
+    public override void ReadFrom(Stream stream, BinaryStreamHeader? header = null)
     {
         if (header == null)
             Header.ReadFrom(stream);
@@ -31,7 +31,7 @@ public abstract class DffStruct : DffChunk
     }
 }
 
-public class UnknownDffStruct : DffStruct
+public class UnknownDffStruct : BinaryStreamStruct
 {
 
 }

@@ -1,12 +1,12 @@
 ﻿using System.Text;
 
-namespace RenderWareIoTwo.Formats.Dff.DataChunks;
+namespace RenderWareIoTwo.Formats.BinaryStreamFIle.Dff.DataChunks;
 
 public class StringChunk : ChildlessChunk
 {
     public string Value
     {
-        get => Encoding.ASCII.GetString(this.Data);
+        get => Encoding.ASCII.GetString(Data);
         set => Data = Encoding.ASCII.GetBytes(value);
     }
 }

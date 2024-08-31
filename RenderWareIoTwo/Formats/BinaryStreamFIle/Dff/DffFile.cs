@@ -1,6 +1,6 @@
-﻿using RenderWareIoTwo.Formats.Dff.Chunks;
+﻿using RenderWareIoTwo.Formats.BinaryStreamFIle.Dff.Chunks;
 
-namespace RenderWareIoTwo.Formats.Dff;
+namespace RenderWareIoTwo.Formats.BinaryStreamFIle.Dff;
 
 public class DffFile
 {
@@ -12,15 +12,15 @@ public class DffFile
 
     public DffFile(Stream stream)
     {
-        this.Clump.ReadFrom(stream);
+        Clump.ReadFrom(stream);
     }
 
     public void WriteTo(Stream stream)
     {
-        this.Clump.UpdateHeaderSize();
-        this.Clump.WriteTo(stream);
+        Clump.UpdateHeaderSize();
+        Clump.WriteTo(stream);
     }
 
     public override string ToString()
-        => this.Clump.ToString();
+        => Clump.ToString();
 }

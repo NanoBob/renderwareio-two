@@ -1,5 +1,6 @@
 using FluentAssertions;
-using RenderWareIoTwo.Formats.Dff;
+using RenderWareIoTwo.Formats.BinaryStreamFile;
+using RenderWareIoTwo.Formats.BinaryStreamFIle.Dff;
 using Xunit.Abstractions;
 
 namespace RenderWareIoTwo.Tests;

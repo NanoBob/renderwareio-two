@@ -1,6 +1,7 @@
 ﻿using System.Numerics;
+using RenderWareIoTwo.Formats.BinaryStreamFile;
 
-namespace RenderWareIoTwo.Formats.Dff;
+namespace RenderWareIoTwo.Formats.BinaryStreamFIle.Dff.Structs;
 
 [Flags]
 public enum FrameFlags : uint
@@ -22,19 +23,19 @@ public record struct Frame(
     public const int Size = 56;
 };
 
-public class FrameListStruct : DffStruct
+public class FrameListStruct : BinaryStreamStruct
 {
     public uint FrameCount
     {
-        get => BitConverter.ToUInt32(this.Data, 0);
-        set => this.Data.ReplaceUint32(0, value);
+        get => BitConverter.ToUInt32(Data, 0);
+        set => Data.ReplaceUint32(0, value);
     }
 
     public IEnumerable<Frame> Frames
     {
         get
         {
-            var stream = new MemoryStream(this.Data)
+            var stream = new MemoryStream(Data)
             {
                 Position = 4
             };
@@ -68,7 +69,7 @@ public class FrameListStruct : DffStruct
                 stream.WriteUint32((uint)frame.Flags);
             }
 
-            this.Data = stream.GetBuffer();
+            Data = stream.GetBuffer();
         }
     }
 }

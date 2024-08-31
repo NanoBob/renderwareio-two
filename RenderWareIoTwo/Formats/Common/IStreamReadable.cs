@@ -1,10 +1,10 @@
-﻿using RenderWareIoTwo.Formats.Dff;
+﻿using RenderWareIoTwo.Formats.BinaryStreamFile;
 
 namespace RenderWareIoTwo.Formats.Common;
 
 public interface IDffStreamReadable
 {
-    public void ReadFrom(Stream stream, DffHeader? header = null);
+    public void ReadFrom(Stream stream, BinaryStreamHeader? header = null);
 }
 
 public interface IStreamReadable

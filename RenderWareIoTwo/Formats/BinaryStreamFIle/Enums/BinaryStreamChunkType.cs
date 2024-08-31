@@ -1,6 +1,6 @@
-﻿namespace RenderWareIoTwo.Formats.Dff.Enums;
+﻿namespace RenderWareIoTwo.Formats.BinaryStreamFile.Enums;
 
-public enum DffChunkType : uint
+public enum BinaryStreamChunkType : uint
 {
     None,
     Struct = 0x00000001,

@@ -1,15 +1,15 @@
 ﻿using RenderWareIoTwo.Formats.Common;
-using RenderWareIoTwo.Formats.Dff.Enums;
+using RenderWareIoTwo.Formats.BinaryStreamFile.Enums;
 using System.Diagnostics;
 
-namespace RenderWareIoTwo.Formats.Dff;
+namespace RenderWareIoTwo.Formats.BinaryStreamFile;
 
 [DebuggerDisplay("{DebuggerDisplay,nq}")]
-public class DffChunk : IDffStreamReadable, IStreamWriteable
+public class BinaryStreamChunk : IDffStreamReadable, IStreamWriteable
 {
-    public DffHeader Header { get; set; } = new();
-    public DffStruct? Struct => this.Children.SingleOrDefault(x => x.Header.Type == DffChunkType.Struct) as DffStruct;
-    public List<DffChunk> Children { get; set; } = [];
+    public BinaryStreamHeader Header { get; set; } = new();
+    public BinaryStreamStruct? Struct => this.Children.SingleOrDefault(x => x.Header.Type == BinaryStreamChunkType.Struct) as BinaryStreamStruct;
+    public List<BinaryStreamChunk> Children { get; set; } = [];
 
     public long ReadPosition { get; protected set; }
 
@@ -21,7 +21,7 @@ public class DffChunk : IDffStreamReadable, IStreamWriteable
             child.WriteTo(stream);
     }
 
-    public virtual void ReadFrom(Stream stream, DffHeader? header = null)
+    public virtual void ReadFrom(Stream stream, BinaryStreamHeader? header = null)
     {
         if (header == null)
             this.Header.ReadFrom(stream);
@@ -34,7 +34,7 @@ public class DffChunk : IDffStreamReadable, IStreamWriteable
         this.ReadPosition = start;
 
         while (stream.Position < start + size)
-            this.Children.Add(DffChunkParser.Parse(stream, this.Header.Type));
+            this.Children.Add(BinaryStreamChunkParser.Parse(stream, this.Header.Type));
     }
 
     public virtual void UpdateHeaderSize()
@@ -51,7 +51,7 @@ public class DffChunk : IDffStreamReadable, IStreamWriteable
         }
     }
 
-    public T? GetChild<T>(bool recursive = false) where T : DffChunk
+    public T? GetChild<T>(bool recursive = false) where T : BinaryStreamChunk
     {
         if (recursive)
         {
@@ -70,7 +70,7 @@ public class DffChunk : IDffStreamReadable, IStreamWriteable
         return (T?)this.Children.SingleOrDefault(x => x is T);
     }
 
-    public T? GetChild<T>(DffChunkType type, bool recursive = false) where T : DffChunk
+    public T? GetChild<T>(BinaryStreamChunkType type, bool recursive = false) where T : BinaryStreamChunk
     {
         if (recursive)
         {
@@ -89,7 +89,7 @@ public class DffChunk : IDffStreamReadable, IStreamWriteable
         return (T?)this.Children.SingleOrDefault(x => x.Header.Type == type);
     }
 
-    public IEnumerable<T> GetChildren<T>(bool recursive = false) where T : DffChunk
+    public IEnumerable<T> GetChildren<T>(bool recursive = false) where T : BinaryStreamChunk
     {
         if (recursive)
         {
@@ -108,7 +108,7 @@ public class DffChunk : IDffStreamReadable, IStreamWriteable
         return this.Children.Where(x => x is T).Cast<T>();
     }
 
-    public IEnumerable<T> GetChildren<T>(DffChunkType type, bool recursive = false) where T : DffChunk
+    public IEnumerable<T> GetChildren<T>(BinaryStreamChunkType type, bool recursive = false) where T : BinaryStreamChunk
     {
         if (recursive)
         {
@@ -116,12 +116,14 @@ public class DffChunk : IDffStreamReadable, IStreamWriteable
             if (matchingChildren != null)
                 return matchingChildren.Cast<T>();
 
+            var matches = new List<T>();
             foreach (var child in this.Children)
             {
-                var match = child.GetChildren<T>(type, recursive);
-                if (match != null)
-                    return match;
+                foreach (var match in child.GetChildren<T>(type, recursive))
+                    matches.Add(match);
             }
+
+            return matches;
         }
 
         return this.Children.Where(x => x.Header.Type == type).Cast<T>();
