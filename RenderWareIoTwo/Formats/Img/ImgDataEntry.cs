@@ -1,13 +1,15 @@
 ﻿namespace RenderWareIoTwo.Formats.Img;
 
-public class ImgDataEntry(Stream stream, ImgDirectoryEntry entry)
+public class ImgDataEntry(Stream? stream, ImgDirectoryEntry entry)
 {
     public const int SectorSize = 2048;
 
-    private readonly Stream stream = stream;
+    private readonly Stream? stream = stream;
     private readonly ImgDirectoryEntry entry = entry;
 
-    private byte[]? data;
+    public ImgDirectoryEntry DirectoryEntry => this.entry;
+
+    private byte[]? data = null;
     public byte[] Data
     {
         get
@@ -15,12 +17,15 @@ public class ImgDataEntry(Stream stream, ImgDirectoryEntry entry)
             if (this.data != null)
                 return this.data;
 
+            if (this.stream == null)
+                return [];
+
             int byteCount = entry.StreamingSize * SectorSize;
             byte[] buffer = new byte[byteCount];
 
             long oldPosition = this.stream.Position;
 
-            int offset = (int)entry.Offset * SectorSize;
+            long offset = entry.Offset * SectorSize;
             this.stream.Position = offset;
             this.stream.Read(buffer, 0, byteCount);
             this.data = buffer;

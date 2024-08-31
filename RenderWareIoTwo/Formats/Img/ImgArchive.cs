@@ -1,4 +1,6 @@
-﻿namespace RenderWareIoTwo.Formats.Img;
+﻿using System.Diagnostics;
+
+namespace RenderWareIoTwo.Formats.Img;
 
 public class ImgArchive
 {
@@ -33,12 +35,11 @@ public class ImgArchive
             throw new Exception("Img archive version must be 4 characters long.");
 
         stream.WriteChars(this.Version);
-        stream.WriteUint32(this.ItemCount);
+        stream.WriteUint32((uint)this.DirectoryEntries.Count);
 
         var headerSize = this.ItemCount * 32;
 
-        var headerStart = stream.Position;
-        var sectionStart = stream.Position + headerSize;
+        var sectionStart = (int)(Math.Ceiling((stream.Position + headerSize) / (float)ImgDataEntry.SectorSize));
 
         var currentSection = (uint)sectionStart;
         foreach (var entry in this.DirectoryEntries)
@@ -46,10 +47,36 @@ public class ImgArchive
             entry.Offset = currentSection;
             entry.WriteTo(stream);
 
-            currentSection += (uint)(entry.StreamingSize * ImgDataEntry.SectorSize);
+            currentSection += (uint)(entry.StreamingSize);
         }
 
         foreach (var entry in this.DataEntries)
+        {
+            var start = entry.Value.DirectoryEntry.Offset * ImgDataEntry.SectorSize;
+            stream.Position = start;
+            var expectedEnd = start + entry.Value.SizeInArchive;
             stream.Write(entry.Value.Data);
+
+            if (stream.Position > expectedEnd)
+                throw new Exception("Wrote too much data");
+
+            stream.Position = expectedEnd;
+        }
+    }
+
+    public void AddEntry(string name, byte[] data)
+    {
+        var directoryEntry = new ImgDirectoryEntry()
+        {
+            Name = name,
+            StreamingSize = (ushort)Math.Ceiling(data.Length / (float)ImgDataEntry.SectorSize)
+        };
+
+        this.DirectoryEntries.Add(directoryEntry);
+
+        this.DataEntries.Add(name, new ImgDataEntry(null, directoryEntry)
+        {
+            Data = data,
+        });
     }
 }

@@ -200,9 +200,18 @@ public class ColBody
             this.ShadowMeshVertices.Add(vertex);
         }
 
-
-        JumpTo(stream, header, header.ShadowMeshFaceOffset + 4);
-
+        JumpTo(stream, header, header.ShadowMeshFaceOffset);
+        for (int i = 0; i < header.ShadowMeshFaceCount; i++)
+        {
+            this.ShadowMeshFaces.Add(new Face()
+            {
+                A = stream.ReadUint16(),
+                B = stream.ReadUint16(),
+                C = stream.ReadUint16(),
+                Material = (MaterialId)stream.ReadSingleByte(),
+                Light = stream.ReadSingleByte()
+            });
+        }
 
         JumpTo(stream, header, header.Size + 4);
     }
