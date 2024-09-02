@@ -4,6 +4,11 @@ namespace RenderWareIoTwo.Formats.BinaryStreamFIle.Dff.Structs;
 
 public class TextureStruct : BinaryStreamStruct
 {
+    public TextureStruct()
+    {
+        this.Data = new byte[4];
+    }
+
     public byte FilterMode
     {
         get => Data[0];

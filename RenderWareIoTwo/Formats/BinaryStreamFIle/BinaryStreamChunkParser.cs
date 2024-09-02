@@ -98,6 +98,11 @@ public static class BinaryStreamChunkParser
                 textureNative.ReadFrom(stream, header);
                 return textureNative;
 
+            case BinaryStreamChunkType.MaterialList:
+                var materialList = new MaterialListStruct();
+                materialList.ReadFrom(stream, header);
+                return materialList;
+
         }
 
         var unknown = new UnknownDffStruct();

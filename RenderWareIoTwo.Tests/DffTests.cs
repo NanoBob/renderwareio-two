@@ -1,5 +1,4 @@
 using FluentAssertions;
-using RenderWareIoTwo.Formats.BinaryStreamFile;
 using RenderWareIoTwo.Formats.BinaryStreamFIle.Dff;
 using Xunit.Abstractions;
 

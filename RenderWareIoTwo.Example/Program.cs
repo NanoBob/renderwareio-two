@@ -38,4 +38,6 @@
 //    Console.WriteLine(source);
 //}
 
-Examples.GenerateEmptyImg("C:\\code\\csharp\\RenderWareIoTwo\\RenderWareIoTwo.Tests\\Files\\Img\\input.img");
+//Examples.GenerateEmptyImg("C:\\code\\csharp\\RenderWareIoTwo\\RenderWareIoTwo.Tests\\Files\\Img\\input.img");
+
+Examples.GenerateDff("C:\\code\\csharp\\RenderWareIoTwo\\RenderWareIoTwo.Tests\\Files\\Dff\\generated.dff");

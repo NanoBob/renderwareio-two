@@ -4,6 +4,11 @@ namespace RenderWareIoTwo.Formats.BinaryStreamFIle.Dff.Structs;
 
 public class ClumpStruct : BinaryStreamStruct
 {
+    public ClumpStruct()
+    {
+        this.Data = new byte[12];
+    }
+
     public uint AtomicCount
     {
         get => BitConverter.ToUInt32(Data, 0);

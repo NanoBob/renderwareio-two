@@ -25,6 +25,11 @@ public record struct Frame(
 
 public class FrameListStruct : BinaryStreamStruct
 {
+    public FrameListStruct()
+    {
+        this.Data = new byte[4];
+    }
+
     public uint FrameCount
     {
         get => BitConverter.ToUInt32(Data, 0);

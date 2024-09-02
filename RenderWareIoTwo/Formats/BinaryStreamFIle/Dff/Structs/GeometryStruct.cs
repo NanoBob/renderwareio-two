@@ -30,7 +30,7 @@ public record struct Uv(float X, float Y)
     public const int Size = 8;
 }
 
-public record struct Triangle(ushort VertexIndex2, ushort VertexIndex1, Material Material, ushort VertexIndex3)
+public record struct Triangle(ushort VertexIndex2, ushort VertexIndex1, ushort MaterialIndex, ushort VertexIndex3)
 {
     public const int Size = 8;
 }
@@ -86,7 +86,7 @@ public class GeometryStruct : BinaryStreamStruct
         {
             stream.WriteUint16(triangle.VertexIndex2);
             stream.WriteUint16(triangle.VertexIndex1);
-            stream.WriteUint16((ushort)triangle.Material);
+            stream.WriteUint16(triangle.MaterialIndex);
             stream.WriteUint16(triangle.VertexIndex3);
         }
 
@@ -162,7 +162,7 @@ public class GeometryStruct : BinaryStreamStruct
                 Triangles.Add(new Triangle(
                     stream.ReadUint16(),
                     stream.ReadUint16(),
-                    (Material)stream.ReadUint16(),
+                    stream.ReadUint16(),
                     stream.ReadUint16()
                 ));
         }
@@ -194,8 +194,8 @@ public class GeometryStruct : BinaryStreamStruct
     {
         Header.Size = (uint)(
             4 + 4 + 4 + 4 +
-            Colors.Count * 4 +
-            UvLayers.Sum(x => x.Count() * 8) +
+            (Flags.HasFlag(GeometryFlags.IsPrelit) ? (Colors.Count * 4) : 0) +
+            UvLayers.Sum(x => x.Count * 8) +
             TriangleCount * 8 +
             MorphTargets.Sum(x =>
                 12 + 4 +

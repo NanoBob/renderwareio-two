@@ -37,11 +37,12 @@ public class BinaryStreamChunk : IDffStreamReadable, IStreamWriteable
             this.Children.Add(BinaryStreamChunkParser.Parse(stream, this.Header.Type));
     }
 
+    public void AddChild(BinaryStreamChunk child)
+        => this.Children.Add(child);
+
     public virtual void UpdateHeaderSize()
     {
         uint size = 0;
-
-        size += this.Struct?.Header.Size ?? 0;
 
         foreach (var child in Children)
         {
@@ -49,6 +50,8 @@ public class BinaryStreamChunk : IDffStreamReadable, IStreamWriteable
 
             size += 12 + child.Header.Size;
         }
+
+        this.Header.Size = size;
     }
 
     public T? GetChild<T>(bool recursive = false) where T : BinaryStreamChunk
@@ -70,6 +73,9 @@ public class BinaryStreamChunk : IDffStreamReadable, IStreamWriteable
         return (T?)this.Children.SingleOrDefault(x => x is T);
     }
 
+    public BinaryStreamChunk? GetChild(bool recursive = false)
+        => GetChild<BinaryStreamChunk>(recursive);
+
     public T? GetChild<T>(BinaryStreamChunkType type, bool recursive = false) where T : BinaryStreamChunk
     {
         if (recursive)
@@ -88,6 +94,9 @@ public class BinaryStreamChunk : IDffStreamReadable, IStreamWriteable
 
         return (T?)this.Children.SingleOrDefault(x => x.Header.Type == type);
     }
+
+    public BinaryStreamChunk? GetChild(BinaryStreamChunkType type, bool recursive = false)
+        => GetChild<BinaryStreamChunk>(type, recursive);
 
     public IEnumerable<T> GetChildren<T>(bool recursive = false) where T : BinaryStreamChunk
     {
@@ -108,15 +117,21 @@ public class BinaryStreamChunk : IDffStreamReadable, IStreamWriteable
         return this.Children.Where(x => x is T).Cast<T>();
     }
 
+    public IEnumerable<BinaryStreamChunk> GetChildren(bool recursive = false)
+        => GetChildren<BinaryStreamChunk>(recursive);
+
     public IEnumerable<T> GetChildren<T>(BinaryStreamChunkType type, bool recursive = false) where T : BinaryStreamChunk
     {
         if (recursive)
         {
-            var matchingChildren = this.Children.Where(x => x.Header.Type == type);
-            if (matchingChildren != null)
-                return matchingChildren.Cast<T>();
-
             var matches = new List<T>();
+
+            var matchingChildren = this.Children
+                .Where(x => x.Header.Type == type)
+                .Cast<T>();
+            foreach (var match in matchingChildren)
+                matches.Add(match);
+
             foreach (var child in this.Children)
             {
                 foreach (var match in child.GetChildren<T>(type, recursive))
@@ -128,6 +143,9 @@ public class BinaryStreamChunk : IDffStreamReadable, IStreamWriteable
 
         return this.Children.Where(x => x.Header.Type == type).Cast<T>();
     }
+
+    public IEnumerable<BinaryStreamChunk> GetChildren(BinaryStreamChunkType type, bool recursive = false)
+        => GetChildren<BinaryStreamChunk>(type, recursive);
 
     public override string ToString()
     {

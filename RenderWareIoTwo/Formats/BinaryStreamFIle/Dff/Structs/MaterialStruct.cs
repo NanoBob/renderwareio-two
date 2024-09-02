@@ -10,6 +10,11 @@ public enum MaterialFlags : uint
 
 public class MaterialStruct : BinaryStreamStruct
 {
+    public MaterialStruct()
+    {
+        this.Data = new byte[28];
+    }
+
     public MaterialFlags Flags
     {
         get => (MaterialFlags)BitConverter.ToUInt32(Data, 0);

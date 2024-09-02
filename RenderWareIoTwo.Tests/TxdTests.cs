@@ -43,7 +43,7 @@ public class TxdTests(ITestOutputHelper testOutput)
         var names = txd.TextureDictionary
             .GetChildren<BinaryStreamChunk>(BinaryStreamChunkType.Raster, true)
             .Select(x => x.Struct as TextureNativeStruct)
-            .Select(x => x?.TextureName.Trim('\0'));
+            .Select(x => x?.TextureName);
 
         names.Should().BeEquivalentTo(textureNames);
     }
